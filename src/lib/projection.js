@@ -12,9 +12,14 @@ export function buildTimeline(items, fixedExpenses, mesInicio, numMeses = 12) {
     const key = somaMeses(mesInicio, i);
     // Gastos com "validoAte" (ex.: boletos da construtora) saem da conta
     // nos meses posteriores ao vencimento.
-    const fixos = recorrentes
+    const fixosDetalhes = recorrentes
       .filter((f) => !f.validoAte || diffMeses(key, f.validoAte) >= 0)
-      .reduce((s, f) => s + (Number(f.valor) || 0), 0);
+      .map((f) => ({
+        nome: f.nome,
+        valor: Number(f.valor) || 0,
+        estimado: !!f.estimado,
+      }));
+    const fixos = fixosDetalhes.reduce((s, f) => s + f.valor, 0);
     let parcelas = 0;
     let avista = 0;
     const detalhes = [];
@@ -43,6 +48,7 @@ export function buildTimeline(items, fixedExpenses, mesInicio, numMeses = 12) {
     return {
       key,
       fixos,
+      fixosDetalhes,
       parcelas,
       avista,
       total: fixos + parcelas + avista,

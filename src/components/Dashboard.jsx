@@ -174,12 +174,28 @@ export default function Dashboard() {
               <strong>{labelMesLongo(detalheMes.key)}</strong>
               <strong>{formatBRL(detalheMes.total)}</strong>
             </div>
-            <div className="detalhe-mes-linha">
-              <span>Gastos fixos</span>
-              <span>{formatBRL(detalheMes.fixos)}</span>
-            </div>
+            {detalheMes.fixosDetalhes.length > 0 && (
+              <div className="detalhe-mes-secao">
+                <span>Gastos fixos</span>
+                <span>{formatBRL(detalheMes.fixos)}</span>
+              </div>
+            )}
+            {detalheMes.fixosDetalhes.map((f, i) => (
+              <div key={i} className="detalhe-mes-linha sub">
+                <span>
+                  {f.nome} {f.estimado && <em>(estimado)</em>}
+                </span>
+                <span>{formatBRL(f.valor)}</span>
+              </div>
+            ))}
+            {detalheMes.detalhes.length > 0 && (
+              <div className="detalhe-mes-secao">
+                <span>Compras</span>
+                <span>{formatBRL(detalheMes.parcelas + detalheMes.avista)}</span>
+              </div>
+            )}
             {detalheMes.detalhes.map((d, i) => (
-              <div key={i} className="detalhe-mes-linha">
+              <div key={i} className="detalhe-mes-linha sub">
                 <span>
                   {d.nome} <em>({d.info})</em>
                 </span>

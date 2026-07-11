@@ -817,12 +817,26 @@ a {
   justify-content: space-between;
   margin-bottom: 8px;
 }
+.detalhe-mes-secao {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0 3px;
+  font-weight: 700;
+}
+.detalhe-mes-secao span:last-child {
+  font-variant-numeric: tabular-nums;
+}
 .detalhe-mes-linha {
   display: flex;
   justify-content: space-between;
   gap: 12px;
   padding: 3px 0;
   color: var(--tinta-2);
+}
+.detalhe-mes-linha.sub {
+  padding-left: 12px;
+  font-size: 13px;
 }
 .detalhe-mes-linha em {
   font-style: normal;
