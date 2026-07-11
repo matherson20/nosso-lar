@@ -6,7 +6,7 @@ import {
   updateFixedExpense,
   deleteFixedExpense,
 } from "../lib/db";
-import { formatBRL, parseBRL } from "../lib/format";
+import { formatBRL, parseBRL, labelMes } from "../lib/format";
 
 const SUGESTOES_RECORRENTES = [
   "Financiamento",
@@ -63,7 +63,16 @@ function LinhaGasto({ gasto }) {
 
   return (
     <div className="linha-gasto">
-      <span className="linha-gasto-nome">{gasto.nome}</span>
+      <span className="linha-gasto-nome">
+        {gasto.nome}
+        {gasto.estimado && <span className="badge estimado">estimado</span>}
+        {gasto.validoAte && (
+          <span className="badge validade">até {labelMes(gasto.validoAte)}</span>
+        )}
+        {gasto.tipo === "unico" && gasto.pago && (
+          <span className="badge pago">✓ pago</span>
+        )}
+      </span>
       <strong>{formatBRL(gasto.valor)}</strong>
       <button
         className="btn-mini"

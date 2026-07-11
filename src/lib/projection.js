@@ -6,12 +6,15 @@ import { somaMeses, diffMeses } from "./format";
 const FATOR_DESTAQUE = 1.2;
 
 export function buildTimeline(items, fixedExpenses, mesInicio, numMeses = 12) {
-  const fixosMensais = fixedExpenses
-    .filter((f) => f.tipo === "recorrente")
-    .reduce((s, f) => s + (Number(f.valor) || 0), 0);
+  const recorrentes = fixedExpenses.filter((f) => f.tipo === "recorrente");
 
   const meses = Array.from({ length: numMeses }, (_, i) => {
     const key = somaMeses(mesInicio, i);
+    // Gastos com "validoAte" (ex.: boletos da construtora) saem da conta
+    // nos meses posteriores ao vencimento.
+    const fixos = recorrentes
+      .filter((f) => !f.validoAte || diffMeses(key, f.validoAte) >= 0)
+      .reduce((s, f) => s + (Number(f.valor) || 0), 0);
     let parcelas = 0;
     let avista = 0;
     const detalhes = [];
@@ -39,10 +42,10 @@ export function buildTimeline(items, fixedExpenses, mesInicio, numMeses = 12) {
 
     return {
       key,
-      fixos: fixosMensais,
+      fixos,
       parcelas,
       avista,
-      total: fixosMensais + parcelas + avista,
+      total: fixos + parcelas + avista,
       detalhes,
     };
   });
@@ -54,7 +57,8 @@ export function buildTimeline(items, fixedExpenses, mesInicio, numMeses = 12) {
     m.acimaDaMedia = media > 0 && m.total > media * FATOR_DESTAQUE;
   }
 
-  return { meses, media, fixosMensais };
+  // fixosMensais: total do mes atual (primeiro da janela), usado no KPI.
+  return { meses, media, fixosMensais: meses[0]?.fixos || 0 };
 }
 
 // Itens que ficam fora da projecao por nao terem mes de compra definido.

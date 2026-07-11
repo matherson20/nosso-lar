@@ -510,6 +510,21 @@ a {
   background: #f0efec;
   color: var(--tinta-2);
 }
+.badge.estimado {
+  background: #fffbeb;
+  color: #92600a;
+}
+.badge.validade {
+  background: #f0f6ff;
+  color: var(--acento-escuro);
+}
+.badge.pago {
+  background: #f0fdf4;
+  color: var(--ok);
+}
+.linha-gasto .badge {
+  margin-left: 6px;
+}
 .chip.prio-essencial.ativo {
   background: #b91c1c;
   border-color: #b91c1c;
