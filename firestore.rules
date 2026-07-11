@@ -5,12 +5,11 @@ service cloud.firestore {
 
     // App do casal: base compartilhada, acesso restrito por allowlist de e-mails.
     // IMPORTANTE: manter esta lista sincronizada com src/lib/allowlist.js.
-    // TODO: substituir pelo e-mail real da esposa antes do deploy.
     function permitido() {
       return request.auth != null
         && request.auth.token.email in [
           'mathersonvieira20@gmail.com',
-          'email-da-esposa@gmail.com'
+          'jbheliodoro@gmail.com'
         ];
     }
 
