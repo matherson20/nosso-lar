@@ -96,14 +96,15 @@ export default function Itens() {
     [items, filtroStatus, filtroPrioridade, filtroComodo]
   );
 
-  // So oferece filtro para comodos que tem item cadastrado, na ordem conhecida.
-  const comodosComItem = useMemo(() => {
-    const usados = new Set(items.map((i) => i.comodo));
-    return [
-      ...comodos.filter((c) => usados.has(c)),
-      ...[...usados].filter((c) => !comodos.includes(c)),
-    ];
-  }, [items, comodos]);
+  // Todos os comodos da casa (padrao + customizados), mais eventuais "orfaos"
+  // que so existem em itens antigos.
+  const comodosFiltro = useMemo(
+    () => [
+      ...comodos,
+      ...new Set(items.map((i) => i.comodo).filter((c) => !comodos.includes(c))),
+    ],
+    [items, comodos]
+  );
 
   // Agrupa na ordem dos comodos conhecidos; comodos "orfaos" (custom removido) vao ao fim.
   const grupos = useMemo(() => {
@@ -202,25 +203,23 @@ export default function Itens() {
             </button>
           ))}
         </div>
-        {comodosComItem.length > 1 && (
-          <div className="chips rolagem">
+        <div className="chips rolagem">
+          <button
+            className={`chip ${filtroComodo === "todos" ? "ativo" : ""}`}
+            onClick={() => setFiltroComodo("todos")}
+          >
+            Todos os cômodos
+          </button>
+          {comodosFiltro.map((c) => (
             <button
-              className={`chip ${filtroComodo === "todos" ? "ativo" : ""}`}
-              onClick={() => setFiltroComodo("todos")}
+              key={c}
+              className={`chip ${filtroComodo === c ? "ativo" : ""}`}
+              onClick={() => setFiltroComodo(c)}
             >
-              Todos os cômodos
+              {c}
             </button>
-            {comodosComItem.map((c) => (
-              <button
-                key={c}
-                className={`chip ${filtroComodo === c ? "ativo" : ""}`}
-                onClick={() => setFiltroComodo(c)}
-              >
-                {c}
-              </button>
-            ))}
-          </div>
-        )}
+          ))}
+        </div>
       </div>
 
       {carregando ? (
