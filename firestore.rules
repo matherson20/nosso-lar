@@ -1,0 +1,22 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // App do casal: base compartilhada, acesso restrito por allowlist de e-mails.
+    // IMPORTANTE: manter esta lista sincronizada com src/lib/allowlist.js.
+    // TODO: substituir pelo e-mail real da esposa antes do deploy.
+    function permitido() {
+      return request.auth != null
+        && request.auth.token.email in [
+          'mathersonvieira20@gmail.com',
+          'email-da-esposa@gmail.com'
+        ];
+    }
+
+    // Os dois enxergam e editam tudo; qualquer outra pessoa nao le nem escreve nada.
+    match /{document=**} {
+      allow read, write: if permitido();
+    }
+  }
+}
