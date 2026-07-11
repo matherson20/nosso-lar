@@ -344,6 +344,20 @@ a {
   gap: 8px;
   margin-bottom: 16px;
 }
+/* linha de chips que rola na horizontal (filtro de comodos no celular) */
+.chips.rolagem {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+.chips.rolagem::-webkit-scrollbar {
+  display: none;
+}
+.chips.rolagem .chip {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
 
 /* ── Formulários ── */
 .painel-form {

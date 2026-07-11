@@ -81,6 +81,7 @@ export default function Itens() {
   const { items, comodos, carregando } = useData();
   const [filtroStatus, setFiltroStatus] = useState("todos");
   const [filtroPrioridade, setFiltroPrioridade] = useState("todas");
+  const [filtroComodo, setFiltroComodo] = useState("todos");
   const [formAberto, setFormAberto] = useState(false);
   const [editando, setEditando] = useState(null);
 
@@ -89,10 +90,20 @@ export default function Itens() {
       items.filter(
         (i) =>
           (filtroStatus === "todos" || i.status === filtroStatus) &&
-          (filtroPrioridade === "todas" || i.prioridade === filtroPrioridade)
+          (filtroPrioridade === "todas" || i.prioridade === filtroPrioridade) &&
+          (filtroComodo === "todos" || i.comodo === filtroComodo)
       ),
-    [items, filtroStatus, filtroPrioridade]
+    [items, filtroStatus, filtroPrioridade, filtroComodo]
   );
+
+  // So oferece filtro para comodos que tem item cadastrado, na ordem conhecida.
+  const comodosComItem = useMemo(() => {
+    const usados = new Set(items.map((i) => i.comodo));
+    return [
+      ...comodos.filter((c) => usados.has(c)),
+      ...[...usados].filter((c) => !comodos.includes(c)),
+    ];
+  }, [items, comodos]);
 
   // Agrupa na ordem dos comodos conhecidos; comodos "orfaos" (custom removido) vao ao fim.
   const grupos = useMemo(() => {
@@ -191,6 +202,25 @@ export default function Itens() {
             </button>
           ))}
         </div>
+        {comodosComItem.length > 1 && (
+          <div className="chips rolagem">
+            <button
+              className={`chip ${filtroComodo === "todos" ? "ativo" : ""}`}
+              onClick={() => setFiltroComodo("todos")}
+            >
+              Todos os cômodos
+            </button>
+            {comodosComItem.map((c) => (
+              <button
+                key={c}
+                className={`chip ${filtroComodo === c ? "ativo" : ""}`}
+                onClick={() => setFiltroComodo(c)}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {carregando ? (
