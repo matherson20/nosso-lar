@@ -1,7 +1,14 @@
 import { useMemo, useState } from "react";
 import { useData } from "../lib/useData.jsx";
 import { buildTimeline, itensSemMes } from "../lib/projection";
-import { formatBRL, labelMes, labelMesLongo, mesAtual } from "../lib/format";
+import {
+  formatBRL,
+  formatCompacto,
+  labelMes,
+  labelMesCurto,
+  labelMesLongo,
+  mesAtual,
+} from "../lib/format";
 
 // Cores das séries (paleta validada, modo claro):
 // fixos = azul, parcelas = aqua, à vista = amarelo. Aqua/amarelo têm contraste
@@ -24,7 +31,8 @@ function Tile({ rotulo, valor, destaque }) {
 
 export default function Dashboard() {
   const { items, fixedExpenses, carregando } = useData();
-  const [mesSelecionado, setMesSelecionado] = useState(null);
+  // Ja abre com o mes atual selecionado para o detalhe ficar descobrivel.
+  const [mesSelecionado, setMesSelecionado] = useState(mesAtual());
 
   const totalPlanejado = items.reduce((s, i) => s + (Number(i.valor) || 0), 0);
   const totalComprado = items
@@ -52,6 +60,9 @@ export default function Dashboard() {
   const semMes = itensSemMes(items);
   const maxComodo = porComodo[0]?.total || 1;
   const maxMes = Math.max(...meses.map((m) => m.total), 1);
+  // Rotula so a primeira coluna com o valor maximo (evita 12 rotulos iguais
+  // quando os meses empatam, ex.: so gastos fixos cadastrados).
+  const idxMax = meses.findIndex((m) => m.total === maxMes);
   const detalheMes = meses.find((m) => m.key === mesSelecionado);
 
   if (carregando) return <div className="vazio">Carregando…</div>;
@@ -127,34 +138,49 @@ export default function Dashboard() {
         </div>
 
         <div className="colunas">
-          {meses.map((m) => (
-            <button
-              key={m.key}
-              className={`coluna ${m.acimaDaMedia ? "alerta" : ""} ${
-                mesSelecionado === m.key ? "selecionada" : ""
-              }`}
-              onClick={() =>
-                setMesSelecionado(mesSelecionado === m.key ? null : m.key)
-              }
-            >
-              {m.acimaDaMedia && <span className="coluna-flag">⚠</span>}
-              <div className="coluna-pilha">
-                {SERIES.map((s) =>
-                  m[s.id] > 0 ? (
-                    <div
-                      key={s.id}
-                      className="coluna-seg"
-                      style={{
-                        height: `${(m[s.id] / maxMes) * 100}%`,
-                        background: s.cor,
-                      }}
-                    />
-                  ) : null
-                )}
-              </div>
-              <span className="coluna-rotulo">{labelMes(m.key)}</span>
-            </button>
-          ))}
+          {meses.map((m, i) => {
+            // Rotulo de valor so nas colunas-chave (mais alta e alertas),
+            // para dar escala sem poluir as 12 colunas.
+            const rotulaValor = m.total > 0 && (i === idxMax || m.acimaDaMedia);
+            return (
+              <button
+                key={m.key}
+                className={`coluna ${m.acimaDaMedia ? "alerta" : ""} ${
+                  mesSelecionado === m.key ? "selecionada" : ""
+                }`}
+                onClick={() =>
+                  setMesSelecionado(mesSelecionado === m.key ? null : m.key)
+                }
+              >
+                <span
+                  className={`coluna-valor ${m.acimaDaMedia ? "alerta" : ""}`}
+                >
+                  {rotulaValor
+                    ? `${m.acimaDaMedia ? "⚠ " : ""}${formatCompacto(m.total)}`
+                    : " "}
+                </span>
+                <div className="coluna-pilha">
+                  {SERIES.map((s) =>
+                    m[s.id] > 0 ? (
+                      <div
+                        key={s.id}
+                        className="coluna-seg"
+                        style={{
+                          height: `${(m[s.id] / maxMes) * 100}%`,
+                          background: s.cor,
+                        }}
+                      />
+                    ) : null
+                  )}
+                </div>
+                <span className="coluna-rotulo">
+                  {i === 0 || m.key.endsWith("-01")
+                    ? labelMes(m.key)
+                    : labelMesCurto(m.key)}
+                </span>
+              </button>
+            );
+          })}
         </div>
 
         <div className="legenda">

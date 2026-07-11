@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../lib/useAuth.jsx";
 import { useData } from "../lib/useData.jsx";
 import { addItem, updateItem, deleteItem } from "../lib/db";
@@ -141,12 +141,25 @@ export default function Itens() {
     setFormAberto(true);
   }
 
+  function fecharForm() {
+    setFormAberto(false);
+    setEditando(null);
+  }
+
+  // Trava o scroll da pagina enquanto a folha (bottom sheet) esta aberta.
+  useEffect(() => {
+    document.body.style.overflow = formAberto ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [formAberto]);
+
   return (
     <div className="pagina">
       <div className="pagina-topo">
         <h2>Itens da casa</h2>
         <button
-          className="btn-pri"
+          className="btn-pri so-desktop"
           onClick={() => {
             setEditando(null);
             setFormAberto(true);
@@ -157,68 +170,79 @@ export default function Itens() {
       </div>
 
       {formAberto && (
-        <div className="painel-form">
-          <h3>{editando ? "Editar item" : "Novo item"}</h3>
-          <ItemForm
-            itemInicial={editando}
-            aoSalvar={salvar}
-            aoCancelar={() => {
-              setFormAberto(false);
-              setEditando(null);
-            }}
-          />
+        <div className="folha-fundo" onClick={fecharForm}>
+          <div
+            className="folha"
+            role="dialog"
+            aria-modal="true"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="folha-cabo" />
+            <h3>{editando ? "Editar item" : "Novo item"}</h3>
+            <ItemForm
+              itemInicial={editando}
+              aoSalvar={salvar}
+              aoCancelar={fecharForm}
+            />
+          </div>
         </div>
       )}
 
       <div className="filtros">
-        <div className="chips">
-          {[
-            ["todos", "Todos"],
-            ["planejado", "Planejados"],
-            ["comprado", "Comprados"],
-          ].map(([id, rotulo]) => (
-            <button
-              key={id}
-              className={`chip ${filtroStatus === id ? "ativo" : ""}`}
-              onClick={() => setFiltroStatus(id)}
-            >
-              {rotulo}
-            </button>
-          ))}
+        <div className="chips-wrap">
+          <div className="chips rolagem">
+            {[
+              ["todos", "Todos"],
+              ["planejado", "Planejados"],
+              ["comprado", "Comprados"],
+            ].map(([id, rotulo]) => (
+              <button
+                key={id}
+                className={`chip ${filtroStatus === id ? "ativo" : ""}`}
+                onClick={() => setFiltroStatus(id)}
+              >
+                {rotulo}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="chips">
-          <button
-            className={`chip ${filtroPrioridade === "todas" ? "ativo" : ""}`}
-            onClick={() => setFiltroPrioridade("todas")}
-          >
-            Todas
-          </button>
-          {PRIORIDADES.map((p) => (
+        <div className="chips-wrap">
+          <div className="chips rolagem">
             <button
-              key={p.id}
-              className={`chip ${filtroPrioridade === p.id ? "ativo" : ""}`}
-              onClick={() => setFiltroPrioridade(p.id)}
+              className={`chip ${filtroPrioridade === "todas" ? "ativo" : ""}`}
+              onClick={() => setFiltroPrioridade("todas")}
             >
-              {p.rotulo}
+              Todas
             </button>
-          ))}
+            {PRIORIDADES.map((p) => (
+              <button
+                key={p.id}
+                className={`chip ${filtroPrioridade === p.id ? "ativo" : ""}`}
+                onClick={() => setFiltroPrioridade(p.id)}
+              >
+                {p.rotulo}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="chips rolagem">
-          <button
-            className={`chip ${filtroComodo === "todos" ? "ativo" : ""}`}
-            onClick={() => setFiltroComodo("todos")}
-          >
-            Todos os cômodos
-          </button>
-          {comodosFiltro.map((c) => (
+        <div className="chips-wrap">
+          <div className="chips rolagem">
             <button
-              key={c}
-              className={`chip ${filtroComodo === c ? "ativo" : ""}`}
-              onClick={() => setFiltroComodo(c)}
+              className={`chip ${filtroComodo === "todos" ? "ativo" : ""}`}
+              onClick={() => setFiltroComodo("todos")}
             >
-              {c}
+              Todos os cômodos
             </button>
-          ))}
+            {comodosFiltro.map((c) => (
+              <button
+                key={c}
+                className={`chip ${filtroComodo === c ? "ativo" : ""}`}
+                onClick={() => setFiltroComodo(c)}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -258,6 +282,17 @@ export default function Itens() {
           ))}
         </>
       )}
+
+      <button
+        className="fab"
+        aria-label="Adicionar item"
+        onClick={() => {
+          setEditando(null);
+          setFormAberto(true);
+        }}
+      >
+        ➕
+      </button>
     </div>
   );
 }

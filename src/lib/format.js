@@ -60,6 +60,23 @@ export function labelMes(key) {
   return `${MESES_CURTOS[m - 1]}/${String(y).slice(2)}`;
 }
 
+// "2026-07" -> "jul" (sem ano; usado quando o ano ja esta claro no contexto)
+export function labelMesCurto(key) {
+  if (!key) return "—";
+  const [, m] = key.split("-").map(Number);
+  return MESES_CURTOS[m - 1];
+}
+
+// Valor compacto para rotulos de grafico: 10410 -> "10,4 mil"
+const compacto = new Intl.NumberFormat("pt-BR", {
+  notation: "compact",
+  maximumFractionDigits: 1,
+});
+
+export function formatCompacto(valor) {
+  return compacto.format(Number(valor) || 0);
+}
+
 // "2026-07" -> "julho de 2026"
 const MESES_LONGOS = [
   "janeiro", "fevereiro", "março", "abril", "maio", "junho",

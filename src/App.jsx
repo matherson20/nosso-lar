@@ -84,7 +84,11 @@ export default function App() {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return <div className="tela-carregando">Carregando…</div>;
+    return (
+      <div className="tela-carregando">
+        <div className="spinner" aria-label="Carregando" />
+      </div>
+    );
   }
 
   if (!user) return <Login />;
